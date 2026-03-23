@@ -24,6 +24,14 @@ def health():
     return {"ok": True}
 
 
+@app.get("/debug-pinecone")
+def debug_pinecone():
+    from app.pinecone_client import get_index
+    index = get_index()
+    stats = index.describe_index_stats()
+    return {"stats": stats}
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
     answer, sources = answer_question(req.text())
