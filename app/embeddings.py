@@ -1,19 +1,14 @@
-from sentence_transformers import SentenceTransformer
-
 from .config import settings
-
-
-_model: SentenceTransformer | None = None
-
-
-def get_embedder() -> SentenceTransformer:
-    global _model
-    if _model is None:
-        _model = SentenceTransformer(settings.embedding_model)
-    return _model
+from .pinecone_client import get_pinecone_client
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
-    model = get_embedder()
-    vectors = model.encode(texts, normalize_embeddings=True)
-    return [v.tolist() for v in vectors]
+    """Embed a list of texts using Pinecone Inference API (no local model / no PyTorch)."""
+    pc = get_pinecone_client()
+    result = pc.inference.embed(
+        model=settings.embedding_model,
+        inputs=texts,
+        parameters={"input_type": "query", "truncate": "END"},
+    )
+    # result is a list of EmbeddingsList objects; each has a .values attribute
+    return [item.values for item in result]

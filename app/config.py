@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     pinecone_cloud: str = "aws"
     pinecone_region: str = "us-east-1"
 
-    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    # Pinecone Inference hosted model — no local weights needed
+    # Produces 1024-dim vectors; change embedding_dimension too if you switch models
+    embedding_model: str = "multilingual-e5-large"
+    embedding_dimension: int = 1024
 
     openrouter_api_key: str
     openrouter_model: str = "deepseek/deepseek-chat"
