@@ -4,12 +4,19 @@ A FastAPI + Streamlit RAG chatbot that answers questions about your resume/portf
 
 ## Features
 
-- **RAG-powered answers** grounded in your resume/portfolio content
-- **Pinecone vector search** with local embeddings (sentence-transformers)
-- **OpenRouter LLM integration** (configurable model)
-- **Streamlit UI** for quick testing
-- **FastAPI backend** ready to embed into any portfolio site
-- **Citations** with source snippets and similarity scores
+- **Context-Aware Responses**: Provides RAG (Retrieval-Augmented Generation) answers strictly grounded in your provided resume or portfolio content.
+- **Source Citations**: Returns exact source snippets and similarity scores for full transparency.
+- **API-First Design**: A robust FastAPI backend that can be seamlessly integrated into any external portfolio website.
+- **Interactive Web UI**: Includes a Streamlit interface for quick local testing and demonstration.
+
+## Technologies Used
+
+- **Frameworks**: [FastAPI](https://fastapi.tiangolo.com/) (High-performance API backend), [Streamlit](https://streamlit.io/) (Frontend chat UI)
+- **Vector Database**: [Pinecone](https://www.pinecone.io/) (Serverless vector search & retrieval)
+- **Embeddings**: Pinecone Inference API (Generates text embeddings server-side without requiring local ML models like PyTorch)
+- **LLM Integration**: [OpenRouter](https://openrouter.ai/) (Via OpenAI SDK) allowing flexible model configuration (e.g., DeepSeek, OpenAI, Claude)
+- **Document Processing**: [PyPDF](https://pypdf.readthedocs.io/) for parsing logic from PDF resumes
+- **Data Management**: [Pydantic](https://docs.pydantic.dev/) for data validation and settings configuration
 
 ## Quick Start
 
@@ -42,8 +49,8 @@ PINECONE_INDEX=resume
 PINECONE_CLOUD=aws
 PINECONE_REGION=us-east-1
 
-# Embeddings (local)
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+# Embeddings (Pinecone Inference)
+EMBEDDING_MODEL=multilingual-e5-large
 
 # OpenRouter (LLM)
 OPENROUTER_API_KEY=your_openrouter_api_key
@@ -111,7 +118,7 @@ curl -X POST "http://127.0.0.1:8000/chat" \
     ├── __init__.py
     ├── config.py        # Settings from .env
     ├── schemas.py       # Pydantic models
-    ├── embeddings.py    # Local sentence‑transformers wrapper
+    ├── embeddings.py    # Pinecone Inference wrapper
     ├── pinecone_client.py # Pinecone index helper
     ├── llm.py           # OpenRouter client
     └── rag.py           # Retrieve → LLM pipeline
@@ -121,20 +128,20 @@ curl -X POST "http://127.0.0.1:8000/chat" \
 
 ### “No context” / “I couldn’t process your request”
 - Pinecone index is empty: run `python ingest.py your_resume.txt`
-- Dimension mismatch: delete and recreate the Pinecone index with the correct dimension (384 for the default model)
+- Dimension mismatch: delete and recreate the Pinecone index with the correct dimension (1024 for the default `multilingual-e5-large` model)
 
 ### 422 Unprocessable Entity on /chat
 - Ensure `Content-Type: application/json`
 - Send one of: `{"question": "..."} | {"message": "..."} | {"prompt": "..."}`
 
-### Embedding model download errors
-- Ensure the model name in `.env` is a public Hugging Face model (e.g., `sentence-transformers/all-MiniLM-L6-v2`)
+### Embedding model invocation errors
+- Ensure the model name in `.env` is supported by Pinecone Inference (e.g., `multilingual-e5-large` or `sentence-transformers/all-MiniLM-L6-v2`)
 
 ## Deployment Notes
 
 - **FastAPI**: Deploy on Render, Railway, or any Python host. Set env vars in the host.
 - **Streamlit**: Optional; only for local testing.
-- **Pinecone**: Create a Serverless index with 384 dimensions (cosine metric).
+- **Pinecone**: Create a Serverless index with 1024 dimensions (cosine metric).
 - **OpenRouter**: Get an API key and optionally set `OPENROUTER_SITE_URL`/`OPENROUTER_APP_NAME`.
 
 ## License
